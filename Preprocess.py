@@ -12,7 +12,7 @@ for word in wn.words():
         statistics[word[0]] += 1
 
 words.sort()
-print(words)
+# print(words)
 print("Number of words in the corpus: ", len(words))
 print("Distribution of words starting with each letter in corpus: ", statistics)
 
