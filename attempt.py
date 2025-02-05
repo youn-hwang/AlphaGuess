@@ -1,16 +1,18 @@
 from nltk.corpus import wordnet as wn
 from collections import defaultdict
+import csv
+import torch
+import torch.nn as nn
+import random
+random.seed(0)
+from sklearn.model_selection import train_test_split
 
 words = []
 for word in wn.words():
     # filter out words including hyphens, numbers, etc.
     if word.isalpha() and len(word) <= 15:
         words.append(word)
-
 words.sort()
-print("Number of words in the corpus: ", len(words))
-
-import csv
 
 # save words to a csv file
 url = 'words'
@@ -31,9 +33,6 @@ for i in range(1, 16):
             writer.writerow([item])
 
 # create neural network
-import torch
-import torch.nn as nn
-
 class HangmanNN(nn.Module):
     def __init__(self, num_letters, hidden_size=32):
         super(HangmanNN, self).__init__()
@@ -41,22 +40,15 @@ class HangmanNN(nn.Module):
         self.fc1 = nn.Linear(num_letters * (alphabet + 1), hidden_size)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, alphabet)
-        self.softmax = nn.Softmax()
 
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
         out = self.fc2(out)
-        out = self.softmax(out)
         return out
 
-# create inputs and outputs
-import random
-random.seed(0)
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-
-for l in range(1, 8):
+# create inputs and outputs for the neural network
+for l in range(1, 16):
     input = torch.zeros(len(words_by_length[l]), l * 27)
     output = torch.zeros(len(words_by_length[l]), 26)
     for i in range(len(words_by_length[l])):
@@ -75,8 +67,8 @@ for l in range(1, 8):
     # create instance of model
     model = HangmanNN(l)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     epochs = 100
     losses = []
