@@ -1,30 +1,21 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-# n = len(word)
-# n is variable
-n = 7
-input_dim = 27 * n
-# hidden_dim: can experiment with different hidden dimensions
-hidden_dim = 32
-output_dim = 26
+class HangmanNN(nn.Module):
+    def __init__(self, num_letters, hidden_size=32):
+        super(HangmanNN, self).__init__()
+        alphabet = 26
+        self.fc1 = nn.Linear(num_letters * (alphabet + 1), hidden_size)
+        self.relu = nn.ReLu()
+        self.fc2 = nn.Linear(hidden_size, alphabet)
+        self.softmax = nn.Softmax()
 
-# activation function: can experiment with different activation functions
-relu = nn.Relu()
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        out = self.softmax(out)
 
-# model architecture
-fc1 = nn.Linear(input_dim, hidden_dim)
-fc2 = nn.Linear(hidden_dim, output_dim)
-
-softmax = nn.Softmax()
-
-model = nn.Sequential(
-    fc1,
-    relu,
-    fc2,
-    softmax
-)
-
-def forward(self, x):
-    output = self.model(x)
-    return output
+# create instance of model
+model = HangmanNN(5)
