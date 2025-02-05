@@ -1,28 +1,14 @@
 from nltk.corpus import wordnet as wn
 from collections import defaultdict
 
-# count the distribution of words 
-# starting with each letter in this corpus
-# and the distribution of word lengths in this corpus
-starting_letter_distribution = defaultdict(int)
-length_distribution = defaultdict(int)
-
 words = []
 for word in wn.words():
     # filter out words including hyphens, numbers, etc.
     if word.isalpha() and len(word) <= 15:
         words.append(word)
-        starting_letter_distribution[word[0]] += 1
-        length_distribution[len(word)] += 1
 
 words.sort()
-starting_letter_distribution = dict(sorted(starting_letter_distribution.items()))
-length_distribution = dict(sorted(length_distribution.items()))
-
-# print(words)
 print("Number of words in the corpus: ", len(words))
-print("Distribution of words starting with each letter in corpus: ", starting_letter_distribution)
-print("Distribution of word lengths in corpus: ", length_distribution)
 
 import csv
 
@@ -44,13 +30,33 @@ for i in range(1, 16):
         for item in words_by_length[i]:
             writer.writerow([item])
 
-# create inputs and outputs
+# create neural network
 import torch
+import torch.nn as nn
+
+class HangmanNN(nn.Module):
+    def __init__(self, num_letters, hidden_size=32):
+        super(HangmanNN, self).__init__()
+        alphabet = 26
+        self.fc1 = nn.Linear(num_letters * (alphabet + 1), hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, alphabet)
+        self.softmax = nn.Softmax()
+
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        out = self.softmax(out)
+        return out
+
+# create inputs and outputs
 import random
 random.seed(0)
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
-for l in range(1, 16):
+for l in range(1, 8):
     input = torch.zeros(len(words_by_length[l]), l * 27)
     output = torch.zeros(len(words_by_length[l]), 26)
     for i in range(len(words_by_length[l])):
@@ -62,5 +68,32 @@ for l in range(1, 16):
             if word[j] != "_":
                 input[i, j * 27 + ord(word[j]) - ord('a')] = 1
             else:
+                input[i, j * 27 + 27] = 1
                 output[i, ord(word[j]) - ord('a')] = 1
     X_train, X_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=0)
+
+    # create instance of model
+    model = HangmanNN(l)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+    epochs = 100
+    losses = []
+    for epoch in range(epochs):
+        y_pred = model.forward(X_train)
+        loss = criterion(y_pred, y_train)
+        losses.append(loss)
+
+        if epoch % 10 == 0:
+            print(str(l))
+            print(f'Epoch {epoch} loss is {loss}')
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    with torch.no_grad():
+        y_eval = model.forward(X_test)
+        loss = criterion(y_eval, y_test)
+        print(f'Loss on test set is {loss}')
