@@ -48,6 +48,7 @@ class HangmanNN(nn.Module):
         return out
 
 # create inputs and outputs for the neural network
+models = []
 for l in range(1, 16):
     input = torch.zeros(len(words_by_length[l]), l * 27)
     output = torch.zeros(len(words_by_length[l]), 26)
@@ -72,13 +73,14 @@ for l in range(1, 16):
 
     epochs = 100
     losses = []
+    print(f'Length {l}')
+    print('Training...')
     for epoch in range(epochs):
         y_pred = model.forward(X_train)
         loss = criterion(y_pred, y_train)
         losses.append(loss)
 
         if epoch % 10 == 0:
-            print(str(l))
             print(f'Epoch {epoch} loss is {loss}')
         
         optimizer.zero_grad()
@@ -89,3 +91,8 @@ for l in range(1, 16):
         y_eval = model.forward(X_test)
         loss = criterion(y_eval, y_test)
         print(f'Loss on test set is {loss}')
+    
+    models.append(model)
+
+
+random.randIndex(0, len(words))
