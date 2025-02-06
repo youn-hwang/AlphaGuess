@@ -4,9 +4,8 @@ import csv
 import torch
 import torch.nn as nn
 import random
-random.seed(0)
 from sklearn.model_selection import train_test_split
-import itertools
+random.seed(0)
 
 words = []
 for word in wn.words():
@@ -53,29 +52,31 @@ models = []
 for l in range(1, 16):
     input = None
     output = None
-    for i in range(len(words_by_length[l])):
-        word = words_by_length[l][i]
+    temp = random.sample(words_by_length[l], min(len(words_by_length[l]), 1000))
+    for i in range(len(temp)):
+        word = temp[i]
         word_copy = word
-        letters = list(set(list(word)))
-        subset = random.sample(letters, random.randint(1, len(letters)))
-        for letter in subset:
+        my_list = list(set(list(word)))
+        size = random.randint(1, len(my_list))
+        subset = random.sample(my_list, size)
+        for letter in subset: 
             word = word.replace(letter, '_')
-        next_row_input = torch.zeros(1, l * 27)
-        next_row_output = torch.zeros(1, 26)
-        for j in range(len(word)):
-            if word[j] != "_":
-                next_row_input[0, j * 27 + ord(word[j]) - ord('a')] = 1
+            next_row_input = torch.zeros(1, l * 27)
+            next_row_output = torch.zeros(1, 26)
+            for j in range(len(word)):
+                if word[j] != "_":
+                    next_row_input[0, j * 27 + ord(word[j]) - ord('a')] = 1
+                else:
+                    next_row_input[0, j * 27 + 26] = 1
+                    next_row_output[0, ord(word_copy[j]) - ord('a')] = 1
+            if input is None:
+                input = next_row_input
+                output = next_row_output
             else:
-                next_row_input[0, j * 27 + 26] = 1
-                next_row_output[0, ord(word_copy[j]) - ord('a')] = 1
-        if input is None:
-            input = next_row_input
-            output = next_row_output
-        else:
-            input = torch.concatenate((input, next_row_input), dim=0)
-            output = torch.concatenate((output, next_row_output), dim=0)
-    X_train, X_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=0)
-
+                input = torch.concatenate((input, next_row_input), dim=0)
+                output = torch.concatenate((output, next_row_output), dim=0)
+    X_raw, X_test, y_raw, y_test = train_test_split(input, output, test_size=0.2, random_state=0)
+    X_train, X_val, y_train, y_val = train_test_split(X_raw, y_raw, test_size = 0.2, random_state=0)
     # create instance of model
     model = HangmanNN(l)
 
@@ -99,8 +100,8 @@ for l in range(1, 16):
         optimizer.step()
 
     with torch.no_grad():
-        y_eval = model.forward(X_test)
-        loss = criterion(y_eval, y_test)
+        y_pred = model.forward(X_val)
+        loss = criterion(y_pred, y_val)
         print(f'Loss on test set is {loss}')
     
     models.append(model)
@@ -109,14 +110,13 @@ for l in range(1, 16):
 def sigmoid(x):
     return 1 / (1 + torch.exp(-x))
 
-
 def play_hangman(model, word, max_guesses=6):
     n = len(word)
     guesses = 0
     correct_guesses = 0
     guessed_word = ['_'] * n
     guessed_letters = []
-    while guesses < max_guesses and correct_guesses < n:
+    while correct_guesses < n:
         input = torch.zeros(1, n * 27)
         for i in range(n):
             if guessed_word[i] != '_':
@@ -124,8 +124,8 @@ def play_hangman(model, word, max_guesses=6):
             else:
                 input[0, i * 27 + 26] = 1
         output = model.forward(input)
-        output = sigmoid(output)
         temp = [(i, output[0, i].item()) for i in range(26)]
+        temp.sort(key=lambda x: x[1], reverse=True)
         j = 0
         guess = chr(temp[j][0] + ord('a'))
         while guess in guessed_letters:
@@ -139,17 +139,22 @@ def play_hangman(model, word, max_guesses=6):
                     correct_guesses += 1
         else:
             guesses += 1
-    return correct_guesses == n
+    return guesses
 
 population = [i for i in range(len(words))]
 sample = 100
 sampled_population = random.sample(population, sample)
 print(sampled_population)
+correct = 0
+total_guesses = 0
 for i in range(sample):
-    print(f'Game {i+1}')
-    correct = 0
-    for j in sampled_population:
-        n = len(words[j])
-        if play_hangman(models[n-1], words[j]):
-            correct += 1
+    print(f'Game {i + 1}')
+    word = words[sampled_population[i]]
+    n = len(word)
+    guesses = play_hangman(models[n-1], word)
+    if guesses <= 6:
+        correct += 1
+    total_guesses += guesses
+    print(guesses)
 print(f'Accuracy: {correct / sample}')
+print(f'Average number of guesses: {total_guesses / sample}')
