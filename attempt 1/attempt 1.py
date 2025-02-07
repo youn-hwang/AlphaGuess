@@ -15,7 +15,7 @@ for word in wn.words():
 words.sort()
 
 # save words to a csv file
-url = 'words'
+url = 'attempt 1/words'
 with open(url + '.csv', 'w') as file:
     writer = csv.writer(file)
     for item in words:

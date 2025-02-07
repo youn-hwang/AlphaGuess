@@ -8,16 +8,17 @@ import random
 random.seed(0)
 
 # Import words
-df_words = pd.read_csv('words.csv', keep_default_na=False)
+url = "attempt 2/"
+df_words = pd.read_csv(url + 'words.csv', keep_default_na=False)
 words = df_words['words'].tolist()
 
-df_train_words = pd.read_csv('train_words.csv', keep_default_na=False)
+df_train_words = pd.read_csv(url + 'train_words.csv', keep_default_na=False)
 train_words = df_train_words['train words'].tolist()
 
-df_valid_words = pd.read_csv('valid_words.csv', keep_default_na=False)
+df_valid_words = pd.read_csv(url + 'valid_words.csv', keep_default_na=False)
 valid_words = df_valid_words['valid words'].tolist()
 
-df_test_words = pd.read_csv('test_words.csv', keep_default_na=False)
+df_test_words = pd.read_csv(url + 'test_words.csv', keep_default_na=False)
 test_words = df_test_words['test words'].tolist()
 print('imported words...')
 
