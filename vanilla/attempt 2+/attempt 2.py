@@ -8,7 +8,7 @@ import random
 random.seed(0)
 
 # Import words
-url = "vanilla/attempt 2/"
+url = "vanilla/attempt 2+/"
 df_words = pd.read_csv(url + 'words.csv', keep_default_na=False)
 words = df_words['words'].tolist()
 
@@ -53,10 +53,10 @@ for l in range(1, 16):
     y_train = []
     for word in train_words_by_length[l]:
         word_copy = word
-        my_list = list(set(list(word)))
+        all_letters = list(set(list(word)))
         for k in range(2):
-            size = random.randint(1, len(my_list))
-            subset = random.sample(my_list, size)
+            size = random.randint(1, len(all_letters))
+            subset = random.sample(all_letters, size)
             for letter in subset:
                 word = word.replace(letter, '_')
             next_row_input = np.zeros((l * 27,))
@@ -73,10 +73,10 @@ for l in range(1, 16):
     y_val = []
     for word in valid_words_by_length[l]:
         word_copy = word
-        my_list = list(set(list(word)))
+        all_letters = list(set(list(word)))
         for k in range(1):
-            size = random.randint(1, len(my_list))
-            subset = random.sample(my_list, size)
+            size = random.randint(1, len(all_letters))
+            subset = random.sample(all_letters, size)
             for letter in subset:
                 word = word.replace(letter, '_')
             next_row_input = np.zeros((l * 27,))
