@@ -2,11 +2,11 @@ import torch
 import pandas as pd
 import random
 import sys
-sys.path.append('vanilla/attempt 2+')
+sys.path.append('feedforward/attempt 2+')
 # replace the following line with which training loss to use
-from train_KLD import models
+from train_BCE_sample import models
 
-url = "vanilla/attempt 2+/"
+url = "feedforward/attempt 2+/"
 
 df_test_words = pd.read_csv(url + 'test_words.csv', keep_default_na=False)
 test_words = df_test_words['test words'].tolist()
