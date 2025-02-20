@@ -3,7 +3,7 @@ import pandas as pd
 import random
 import sys
 sys.path.append('vanilla/attempt 2+')
-from train import models
+from train_KLD import models
 
 url = "vanilla/attempt 2+/"
 
@@ -54,6 +54,6 @@ for i in range(1000):
     if guesses <= 6:
         correct += 1
     total_guesses += guesses
-    # print(f'Game {i+1}, Word: {word}, Guesses: {guesses}')
+    print(f'Game {i+1}, Word: {word}, Guesses: {guesses}')
 print(f'Accuracy: {correct / 1000}')
 print(f'Average number of guesses: {total_guesses / 1000}')
