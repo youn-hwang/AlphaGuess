@@ -4,9 +4,9 @@ import random
 import sys
 sys.path.append('feedforward/attempt 2+')
 # replace the following line with which training loss to use
-from train_BCE_all import models
+from train_BCE import models
 
-url = "feedforward/attempt 2+/"
+url = "feedforward/"
 
 df_test_words = pd.read_csv(url + 'test_words.csv', keep_default_na=False)
 test_words = df_test_words['test words'].tolist()

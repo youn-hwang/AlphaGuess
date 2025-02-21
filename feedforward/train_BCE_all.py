@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 random.seed(0)
 
 # Import words
-url = "feedforward/attempt 2+/"
+url = "feedforward/"
 df_words = pd.read_csv(url + 'words.csv', keep_default_na=False)
 words = df_words['words'].tolist()
 
@@ -88,7 +88,7 @@ for l in range(1, 16):
     X_val = torch.tensor(np.array(X_val), dtype=torch.float32)
     y_val = torch.tensor(np.array(y_val), dtype=torch.float32)
 
-    model = HangmanNN(l, 1000)
+    model = HangmanNN(l, 800)
     criterion = nn.BCEWithLogitsLoss()
     # RMSProp instead of Adam gives similar results
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
