@@ -2,15 +2,18 @@ import torch
 import pandas as pd
 import random
 import sys
-sys.path.append('feedforward/attempt 2+')
+sys.path.append('rnn/')
 # replace the following line with which training loss to use
-from train_BCE_all import models
+from train_BCE import models
 
-url = "feedforward/attempt 2+/"
+url = "rnn/"
 
 df_test_words = pd.read_csv(url + 'test_words.csv', keep_default_na=False)
 test_words = df_test_words['test words'].tolist()
 print('imported words...')
+
+# Training Setup
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Game playing agent
 def play_hangman(model, word, max_guesses=6):
@@ -20,13 +23,18 @@ def play_hangman(model, word, max_guesses=6):
     guessed_word = ['_'] * n
     guessed_letters = []
     while correct_guesses < n:
-        input = torch.zeros(1, n * 27)
+        input = torch.zeros((1, n, 27))
         for i in range(n):
             if guessed_word[i] != '_':
-                input[0, i * 27 + ord(guessed_word[i]) - ord('a')] = 1
+                input[0, i, ord(guessed_word[i]) - ord('a')] = 1
             else:
-                input[0, i * 27 + 26] = 1
-        output = model(input)
+                input[0, i, 26] = 1
+
+        # move to GPU
+        hidden = model.init_hidden(1)
+        input.to(device)
+        output, _ = model(input, hidden)
+
         temp = [(i, output[0, i].item()) for i in range(26)]
         temp.sort(key=lambda x: x[1], reverse=True)
         guess = chr(temp[0][0] + ord('a'))

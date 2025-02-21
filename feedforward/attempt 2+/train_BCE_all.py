@@ -47,12 +47,9 @@ def masking(word, mask):
     return "".join(['_' if letter in mask else letter for letter in word])
 
 # Create inputs and outputs for the neural network
-models = []
-train_losses = []
-validation_losses = []
+models, train_losses, validation_losses = [], [], []
 for l in range(1, 16):
-    X_train = []
-    y_train = []
+    X_train, y_train, X_val, y_val = [], [], [], []
     for word in train_words_by_length[l]:
         all_letters = list(set(word))
         for size in range(1, len(all_letters)+1):
@@ -68,8 +65,7 @@ for l in range(1, 16):
                         next_row_output[ord(word[j]) - ord('a')] = 1
                 X_train.append(next_row_input)
                 y_train.append(next_row_output)
-    X_val = []
-    y_val = []
+
     for word in valid_words_by_length[l]:
         word_original = word
         all_letters = list(set(word))
@@ -87,14 +83,10 @@ for l in range(1, 16):
                 X_val.append(next_row_input)
                 y_val.append(next_row_output)
 
-    X_train = np.array(X_train)
-    y_train = np.array(y_train)
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.float32)
-    X_val = np.array(X_val)
-    y_val = np.array(y_val)
-    X_val = torch.tensor(X_val, dtype=torch.float32)
-    y_val = torch.tensor(y_val, dtype=torch.float32)
+    X_train = torch.tensor(np.array(X_train), dtype=torch.float32)
+    y_train = torch.tensor(np.array(y_train), dtype=torch.float32)
+    X_val = torch.tensor(np.array(X_val), dtype=torch.float32)
+    y_val = torch.tensor(np.array(y_val), dtype=torch.float32)
 
     model = HangmanNN(l, 1000)
     criterion = nn.BCEWithLogitsLoss()
@@ -106,24 +98,23 @@ for l in range(1, 16):
     num_batches = 10
     n = X_train.size()[0]
     batch_size = n // num_batches
-    train_loss = 0
+    train_loss, validation_loss = 0, 0
     for epoch in range(num_epochs):
         if batch_size == 0:
             continue
-        for i in range(0, n, batch_size):
-            X_train_batch = X_train[i: min(i + batch_size, n)]
-            y_train_batch = y_train[i: min(i + batch_size, n)]
+        for i in range(0, num_batches):
+            X_train_batch = X_train[i * batch_size: (i + 1) * batch_size]
+            y_train_batch = y_train[i * batch_size: (i + 1) * batch_size]
             optimizer.zero_grad()
             y_pred = model(X_train_batch)
             loss = criterion(y_pred, y_train_batch)
             loss.backward()
             optimizer.step()
-            print(f'Length {l}, Epoch {epoch}, Batch {i // batch_size}, Loss: {loss.item()}')
+            print(f'Length {l}, Epoch {epoch}, Batch {i}, Loss: {loss.item()}')
         train_loss = loss.item()
     train_losses.append(train_loss)
 
     model.eval()
-    validation_loss = 0
     with torch.no_grad():
         y_pred = model(X_val)
         val_loss = criterion(y_pred, y_val)
@@ -134,7 +125,9 @@ for l in range(1, 16):
     models.append(model)
 
 # Plot losses
-plt.plot(train_losses, label='train')
-plt.plot(validation_losses, label='validation')
+plt.plot(range(1, 16), train_losses, label='train')
+plt.plot(range(1, 16), validation_losses, label='validation')
 plt.legend()
+plt.xlabel("Length of word")
+plt.ylabel("Loss value")
 plt.show()

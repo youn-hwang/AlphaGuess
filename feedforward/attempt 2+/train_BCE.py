@@ -47,14 +47,11 @@ def masking(word, mask):
     return "".join(['_' if letter in mask else letter for letter in word])
 
 # Create inputs and outputs for the neural network
-models = []
-train_losses = []
-validation_losses = []
+models, train_losses, validation_losses = [], [], []
 for l in range(1, 16):
-    X_train = []
-    y_train = []
+    X_train, y_train, X_val, y_val = [], [], [], []
     for word in train_words_by_length[l]:
-        all_letters = list(set(list(word)))
+        all_letters = list(set(word))
         for k in range(2):
             size = random.randint(1, len(all_letters))
             mask = random.sample(all_letters, size)
@@ -69,11 +66,10 @@ for l in range(1, 16):
                     next_row_output[ord(word[j]) - ord('a')] = 1
             X_train.append(next_row_input)
             y_train.append(next_row_output)
-    X_val = []
-    y_val = []
+
     for word in valid_words_by_length[l]:
         word_original = word
-        all_letters = list(set(list(word)))
+        all_letters = list(set(word))
         for k in range(1):
             size = random.randint(1, len(all_letters))
             mask = random.sample(all_letters, size)
@@ -89,14 +85,10 @@ for l in range(1, 16):
             X_val.append(next_row_input)
             y_val.append(next_row_output)
 
-    X_train = np.array(X_train)
-    y_train = np.array(y_train)
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.float32)
-    X_val = np.array(X_val)
-    y_val = np.array(y_val)
-    X_val = torch.tensor(X_val, dtype=torch.float32)
-    y_val = torch.tensor(y_val, dtype=torch.float32)
+    X_train = torch.tensor(np.array(X_train), dtype=torch.float32)
+    y_train = torch.tensor(np.array(y_train), dtype=torch.float32)
+    X_val = torch.tensor(np.array(X_val), dtype=torch.float32)
+    y_val = torch.tensor(np.array(y_val), dtype=torch.float32)
 
     model = HangmanNN(l, 1000)
     criterion = nn.BCEWithLogitsLoss()
@@ -129,7 +121,9 @@ for l in range(1, 16):
     models.append(model)
 
 # Plot losses
-plt.plot(train_losses, label='train')
-plt.plot(validation_losses, label='validation')
+plt.plot(range(1, 16), train_losses, label='train')
+plt.plot(range(1, 16), validation_losses, label='validation')
 plt.legend()
+plt.xlabel("Length of word")
+plt.ylabel("Loss value")
 plt.show()
