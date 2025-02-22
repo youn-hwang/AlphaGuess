@@ -12,7 +12,7 @@ test_words = [word for word in words if word not in raw_words]
 train_words = random.sample(raw_words, int(0.80 * len(raw_words)))
 valid_words = [word for word in raw_words if word not in train_words]
 
-url = "feedforward/"
+url = ""
 df_words = pd.DataFrame(words, columns=['words'])
 df_words.to_csv(url + 'words.csv', index=False)
 

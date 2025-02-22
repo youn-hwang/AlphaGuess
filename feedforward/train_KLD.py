@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 random.seed(0)
 
 # Import words
-url = "feedforward/"
+url = ""
 df_words = pd.read_csv(url + 'words.csv', keep_default_na=False)
 words = df_words['words'].tolist()
 

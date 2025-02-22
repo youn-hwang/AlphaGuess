@@ -11,7 +11,7 @@ from collections import defaultdict
 random.seed(0)
 
 # Define file path
-url = "rnn/"
+url = ""
 
 # Import words
 df_words = pd.read_csv(url + 'words.csv', keep_default_na=False)
