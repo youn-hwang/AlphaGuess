@@ -1,0 +1,7 @@
+1000 Sample Evaluation:
+Accuracy (games fully guessed correctly): 0.3390
+Average number of wrong guesses: 5.1360
+
+All Words Evaluation:
+Accuracy (games with <= 6 wrong guesses): 0.3237
+Average number of wrong guesses: 5.1813
