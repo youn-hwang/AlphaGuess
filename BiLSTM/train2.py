@@ -8,9 +8,8 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from tqdm import tqdm  # For progress bars
+from tqdm import tqdm
 
-# Set seeds for reproducibility.
 random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
@@ -171,7 +170,6 @@ for epoch in range(num_epochs):
     num_batches = 0
     permutation = torch.randperm(X_train.shape[0])
     
-    # Create a progress bar for mini-batch processing.
     pbar = tqdm(range(0, X_train.shape[0], batch_size), desc=f"Epoch {epoch+1}", leave=False)
     
     for i in pbar:
@@ -189,7 +187,6 @@ for epoch in range(num_epochs):
         epoch_loss += loss.item()
         num_batches += 1
         
-        # Update progress bar with current loss.
         pbar.set_postfix(loss=loss.item())
     
     avg_epoch_loss = epoch_loss / num_batches

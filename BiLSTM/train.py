@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-# Set seeds for reproducibility.
 random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
@@ -156,7 +155,6 @@ patience = 3
 best_val_loss = float('inf')
 epochs_without_improvement = 0
 
-# Enable anomaly detection to help trace issues in the backward pass.
 torch.autograd.set_detect_anomaly(True)
 
 train_losses = []
@@ -166,7 +164,6 @@ for epoch in range(num_epochs):
     model.train()
     epoch_loss = 0.0
     num_batches = 0
-    # Shuffle the training data indices.
     permutation = torch.randperm(X_train.shape[0])
     
     for i in range(0, X_train.shape[0], batch_size):
@@ -219,5 +216,5 @@ plt.plot(range(1, len(val_losses)+1), val_losses, label='Validation Loss')
 plt.legend()
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.savefig("BiLSTM_loss_plot.png")
+plt.savefig("BiLSTM_loss_plot_1.png")
 plt.close()
